@@ -4,9 +4,9 @@ import turtle
 import math
 
 # 调整画笔
-turtle.speed(3)
+turtle.speed(1)
 turtle.pensize(2)
-
+LINE_LENGTH = 30
 class MyPen:
     '''
     一只笔
@@ -398,15 +398,23 @@ def drawCubes(cubes: list):
     for line in lines:
         line.draw()
 
+def write_str(write_str):
+    length = LINE_LENGTH
+    line_num = 0
+    write_strs = write_str.split("\n")
+    for i in write_strs:
+        drawCubes(numsToCube(i, length=length,\
+            offset=dot(0, 0, length * 7 * (len(write_strs)//2 - line_num))))
+        line_num += 1
 
 if __name__ == "__main__":
-    write_str = "xiaomi"
-    length = 15
+    turtle.setup(0.8, 0.8)
+    s = "wow"
     t1 = time.time()
-    drawCubes(numsToCube(write_str, length=length))
+    write_str(s)
     print(time.time()-t1)
     t1 = time.time()
-    for cu in numsToCube(write_str, length=length, offset=dot(0, 0, -120)):
+    for cu in numsToCube(s, length=LINE_LENGTH, offset=dot(0, 0, -LINE_LENGTH * 6)):
         cu.draw()
     print(time.time()-t1)
     time.sleep(2)
