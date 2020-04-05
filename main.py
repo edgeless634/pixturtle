@@ -13,6 +13,10 @@ class dot:
         self.x = x
         self.y = y
         self.z = z
+    def __eq__(self, dot):
+        return self.x == dot.x and self.y == dot.y and self.z == dot.z
+    def __hash__(self):
+        return self.x + self.y + self.z
     def toTwo(self):
         '''
         将一个三维点转变为二维坐标
@@ -33,7 +37,10 @@ class line:
     def __init__(self, dot1, dot2):
         self.dot1 = dot1
         self.dot2 = dot2
-
+    def __eq__(self, obj):
+        return self.dot1 == obj.dot1 and self.dot2 == obj.dot2
+    def __hash__(self):
+        return self.dot1.__hash__() + self.dot2.__hash__()
     def draw(self):
         '''
         画出一条线
@@ -48,7 +55,7 @@ class line:
         return math.sqrt((self.dot1.x-self.dot2.x)**2 + (self.dot1.y-self.dot2.y)**2 + (self.dot1.z-self.dot2.z)**2)
 
 class cube:
-    __slots__ = ("A", "B", "C", "D", "A1", "B1", "C1", "D1")
+    __slots__ = ("A", "B", "C", "D", "A1", "B1", "C1", "D1", "lines")
     def __init__(self, dot1, dot2):
         self.A, self.C1 = dot1, dot2
         self.B = dot(self.C1.x, self.A.y, self.A.z)
@@ -57,22 +64,26 @@ class cube:
         self.A1 = dot(self.A.x, self.A.y, self.C1.z)
         self.B1 = dot(self.C1.x, self.A.y, self.C1.z)
         self.D1 = dot(self.A.x, self.C1.y, self.C1.z)
+        self.lines = [
+        line(self.A, self.B),
+        line(self.B, self.C),
+        line(self.C, self.D),
+        line(self.D, self.A),
+        line(self.D, self.D1),
+        line(self.C, self.C1),
+        line(self.B, self.B1),
+        line(self.A, self.A1),
+        line(self.A1, self.B1),
+        line(self.B1, self.C1),
+        line(self.C1, self.D1),
+        line(self.D1, self.A1),
+        ]
     def draw(self):
         '''
         画出这个方块
         '''
-        line(self.A, self.B).draw()
-        line(self.B, self.C).draw()
-        line(self.C, self.D).draw()
-        line(self.D, self.A).draw()
-        line(self.D, self.D1).draw()
-        line(self.C, self.C1).draw()
-        line(self.B, self.B1).draw()
-        line(self.A, self.A1).draw()
-        line(self.A1, self.B1).draw()
-        line(self.B1, self.C1).draw()
-        line(self.C1, self.D1).draw()
-        line(self.D1, self.A1).draw()
+        for i in self.lines:
+            i.draw()
 
 #像素形式的数字
 numToPixels = [[#0
@@ -313,8 +324,7 @@ def pixelsToCube(pixels, dotLD, length):
             if pixels[i][j] != " ":
                 dot1 = dot(dotLD.x + j * length, dotLD.y, dotLD.z + (len(pixels)-i) * length)
                 dot2 = dot(dot1.x + length, dot1.y + length, dot1.z + length)
-                cube1 = cube(dot1, dot2)
-                cubes.append(cube1)
+                cubes.append(cube(dot1, dot2))
     for i in range(1, len(cubes)-1):
         for j in range(i+2, len(cubes)):
             if line(cubes[i].A, cubes[j].A).len() < line(cubes[i].A, cubes[i+1].A).len():
@@ -342,6 +352,19 @@ def numsToCube(n:str, *, length = 20, dotLD = None, offset = dot(0, 0, 0)):
         dotLD = dot(dotLD.x + length * (len(pix[0])+1), dotLD.y, dotLD.z)
     return cubes
 
-for cu in numsToCube("abcde", length = 20):
-    cu.draw()  
+def drawCubes(cubes:list):
+    lines = set()
+    for cu in cubes:
+        for line in cu.lines:
+            lines.add(line)
+    for line in lines:
+        line.draw()
+    
+t1 = time.time()
+for cu in numsToCube("abc", length = 20):
+    cu.draw()
+print(time.time()-t1)
+t1 = time.time()
+drawCubes(numsToCube("abc", length = 20, offset=dot(0, 0, -120)))
+print(time.time()-t1)
 time.sleep(2)
