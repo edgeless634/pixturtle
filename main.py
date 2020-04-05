@@ -5,25 +5,34 @@ import math
 
 # 调整画笔
 turtle.speed(3)
-turtle.pensize(3)
+turtle.pensize(2)
 
 class MyPen:
+    '''
+    一只笔
+    '''
     def __init__(self):
-        self.x, self.y = 0, 0
-    def goto(self, x, y):
-        if (self.x, self.y) == (x, y):
+        self.pen_x, self.pen_y = 0, 0
+    def goto(self, to_x, to_y):
+        '''
+        让画笔移动到某一点
+        '''
+        if (self.pen_x, self.pen_y) == (to_x, to_y):
             return
         turtle.penup()
-        turtle.goto(x, y)
+        turtle.goto(to_x, to_y)
         turtle.pendown()
-        self.x, self.y = x, y
-    def draw(self, x, y):
-        if (self.x, self.y) == (x, y):
+        self.pen_x, self.pen_y = to_x, to_y
+    def draw(self, to_x, to_y):
+        '''
+        让画笔画到某一点
+        '''
+        if (self.pen_x, self.pen_y) == (to_x, to_y):
             return
-        turtle.goto(x, y)
-        self.x, self.y = x, y
+        turtle.goto(to_x, to_y)
+        self.pen_x, self.pen_y = to_x, to_y
 
-pen = MyPen()
+PEN = MyPen()
 
 class dot:
     __slots__ = ("x", "y", "z")
@@ -34,7 +43,9 @@ class dot:
     def __eq__(self, obj):
         return self.x == obj.x and self.y == obj.y and self.z == obj.z
     def __hash__(self):
-        return self.x + self.y + self.z
+        return self.x ^ self.y ^ self.z
+    def __lt__(self, obj):
+        return self.x + self.y + self.z < obj.x + obj.y + obj.z
     def toTwo(self):
         '''
         将一个三维点转变为二维坐标
@@ -45,9 +56,9 @@ class dot:
         点一个点
         '''
         px, py = self.toTwo()
-        
+        PEN.goto(px, py)
         turtle.circle(1, 360)
-        is_pen_down == True
+
 
 class line:
     __slots__ = ("dot1", "dot2", "len")
@@ -60,7 +71,7 @@ class line:
     def __eq__(self, obj):
         return self.dot1 == obj.dot1 and self.dot2 == obj.dot2
     def __hash__(self):
-        return self.dot1.__hash__() + self.dot2.__hash__()
+        return self.dot1.__hash__() * self.dot2.__hash__()
     def __lt__(self,obj):
         if self.len != obj.len:
             return self.len < obj.len
@@ -71,34 +82,37 @@ class line:
         画出一条线
         '''
         x, y = self.dot1.toTwo()
-        pen.goto(x, y)
+        PEN.goto(x, y)
         x, y = self.dot2.toTwo()
-        pen.draw(x, y)
+        PEN.draw(x, y)
 
 class cube:
-    __slots__ = ("A", "B", "C", "D", "A1", "B1", "C1", "D1", "lines")
+    __slots__ = ("dot_a", "dot_b", "dot_c", "dot_d",\
+                "dot_a1", "dot_b1", "dot_c1", "dot_d1", "lines")
     def __init__(self, dot1, dot2):
-        self.A, self.C1 = dot1, dot2
-        self.B = dot(self.C1.x, self.A.y, self.A.z)
-        self.C = dot(self.C1.x, self.C1.y, self.A.z)
-        self.D = dot(self.A.x, self.C1.y, self.A.z)
-        self.A1 = dot(self.A.x, self.A.y, self.C1.z)
-        self.B1 = dot(self.C1.x, self.A.y, self.C1.z)
-        self.D1 = dot(self.A.x, self.C1.y, self.C1.z)
+        self.dot_a, self.dot_c1 = dot1, dot2
+        self.dot_b = dot(self.dot_c1.x, self.dot_a.y, self.dot_a.z)
+        self.dot_c = dot(self.dot_c1.x, self.dot_c1.y, self.dot_a.z)
+        self.dot_d = dot(self.dot_a.x, self.dot_c1.y, self.dot_a.z)
+        self.dot_a1 = dot(self.dot_a.x, self.dot_a.y, self.dot_c1.z)
+        self.dot_b1 = dot(self.dot_c1.x, self.dot_a.y, self.dot_c1.z)
+        self.dot_d1 = dot(self.dot_a.x, self.dot_c1.y, self.dot_c1.z)
         self.lines = [
-        line(self.A, self.B),
-        line(self.B, self.C),
-        line(self.C, self.D),
-        line(self.D, self.A),
-        line(self.D, self.D1),
-        line(self.C, self.C1),
-        line(self.B, self.B1),
-        line(self.A, self.A1),
-        line(self.A1, self.B1),
-        line(self.B1, self.C1),
-        line(self.C1, self.D1),
-        line(self.D1, self.A1),
+        line(self.dot_a, self.dot_b),
+        line(self.dot_b, self.dot_c),
+        line(self.dot_c, self.dot_d),
+        line(self.dot_d, self.dot_a),
+        line(self.dot_d, self.dot_d1),
+        line(self.dot_c, self.dot_c1),
+        line(self.dot_b, self.dot_b1),
+        line(self.dot_a, self.dot_a1),
+        line(self.dot_a1, self.dot_b1),
+        line(self.dot_b1, self.dot_c1),
+        line(self.dot_c1, self.dot_d1),
+        line(self.dot_d1, self.dot_a1),
         ]
+    def __lt__(self, obj):
+        return self.dot_a < obj.dot_a
     def draw(self):
         '''
         画出这个方块
@@ -113,55 +127,55 @@ numToPixels = [[#0
     "** *",
     "** *",
     " ** ",
-],[#1
+], [#1
     "   *",
     "  **",
     "   *",
     "   *",
     "   *",
-],[#2
+], [#2
     " ** ",
     "   *",
     "  * ",
     " *  ",
     " ***",
-],[#3
+], [#3
     "*** ",
     "   *",
     " ** ",
     "   *",
     "*** ",
-],[#4
+], [#4
     "*   ",
     "*  *",
     "****",
     "   *",
     "   *",
-],[#5
+], [#5
     "****",
     "*   ",
     "****",
     "   *",
     "*** ",
-],[#6
+], [#6
     " ** ",
     "*   ",
     "*** ",
     "* * ",
     " ** ",
-],[#7
+], [#7
     " ***",
     "   *",
     "  * ",
     " *  ",
     " *  ",
-],[#8
+], [#8
     " ** ",
     "*  *",
     " ** ",
     "*  *",
     " ** ",
-],[#9
+], [#9
     " ***",
     " * *",
     " ***",
@@ -169,157 +183,157 @@ numToPixels = [[#0
     " ** ",
 ]]
 
-wordToPixels = [[#A
+word_to_pixels = [[#A
     " ** ",
     "*  *",
     "****",
     "*  *",
     "*  *",
-],[#B
+], [#B
     "*** ",
     "*  *",
     "*** ",
     "*  *",
     "*** ",
-],[#C
+], [#C
     " ** ",
     "*   ",
     "*   ",
     "*   ",
     " ** ",
-],[#D
+], [#D
     "*** ",
     "*  *",
     "*  *",
     "*  *",
     "*** ",
-],[#E
+], [#E
     "***",
     "*  ",
     "** ",
     "*  ",
     "***",
-],[#F
+], [#F
     "***",
     "*  ",
     "** ",
     "*  ",
     "*  ",
-],[#G
+], [#G
     " ** ",
     "*   ",
     "* **",
     "*  *",
     " ** ",
-],[#H
+], [#H
     "*  *",
     "*  *",
     "****",
     "*  *",
     "*  *",
-],[#I
+], [#I
     "***",
     " * ",
     " * ",
     " * ",
     "***",
-],[#J
+], [#J
     "  *",
     "  *",
     "  *",
     "* *",
     " * ",
-],[#K
+], [#K
     "* *",
     "* *",
     "** ",
     "* *",
     "* *",
-],[#L
+], [#L
     "*  ",
     "*  ",
     "*  ",
     "*  ",
     "***",
-],[#M
+], [#M
     "*   *",
     "** **",
     "* * *",
     "*   *",
     "*   *",
-],[#N
+], [#N
     "*  *",
     "** *",
     "* **",
     "*  *",
     "*  *",
-],[#O
+], [#O
     " ** ",
     "*  *",
     "*  *",
     "*  *",
     " ** ",
-],[#P
+], [#P
     "*** ",
     "*  *",
     "*** ",
     "*   ",
     "    ",
-],[#Q
+], [#Q
     " ** ",
     "*  *",
     "*  *",
     "* **",
     " ***",
-],[#R
+], [#R
     "*** ",
     "*  *",
     "*** ",
     "*  *",
     "*  *",
-],[#S
+], [#S
     " ***",
     "*   ",
     " ** ",
     "   *",
     "*** ",
-],[#T
+], [#T
     "****",
     " *  ",
     " *  ",
     " *  ",
     " *  ",
-],[#U
+], [#U
     "*  *",
     "*  *",
     "*  *",
     "*  *",
     " ** ",
-],[#V
+], [#V
     "*  *",
     "*  *",
     "*  *",
     " ** ",
     "  * ",
-],[#W
+], [#W
     "*   *",
     "*   *",
     "*   *",
     "* * *",
     " * * ",
-],[#X
+], [#X
     "*   *",
     " * * ",
     "  *  ",
     " * * ",
     "*   *",
-],[#Y
+], [#Y
     "*   *",
     " * * ",
     "  *  ",
     "  *  ",
     "  *  ",
-],[#Z
+], [#Z
     "*****",
     "  *  ",
     " *   ",
@@ -346,11 +360,7 @@ def pixelsToCube(pixels, dotLD, length):
                 dot1 = dot(dotLD.x + j * length, dotLD.y, dotLD.z + (len(pixels)-i) * length)
                 dot2 = dot(dot1.x + length, dot1.y + length, dot1.z + length)
                 cubes.append(cube(dot1, dot2))
-    for i in range(1, len(cubes)-1):
-        for j in range(i+2, len(cubes)):
-            if line(cubes[i].A, cubes[j].A).len < line(cubes[i].A, cubes[i+1].A).len:
-                cubes[j], cubes[i+1] = cubes[i+1], cubes[j]
-    return cubes
+    return sorted(cubes)
 
 def numsToCube(n:str, *, length = 20, dotLD = None, offset = dot(0, 0, 0)):
     '''
@@ -363,10 +373,10 @@ def numsToCube(n:str, *, length = 20, dotLD = None, offset = dot(0, 0, 0)):
         dotLD = dot(-len(n)//2 * length * 5 + offset.x, offset.y, offset.z)
     cubes = []
     for i in n:
-        if 48<=ord(i)<=57:
+        if 48 <= ord(i) <= 57:
             pix = numToPixels[ord(i)-48]
-        elif 65<=ord(i)<=90:
-            pix = wordToPixels[ord(i)-65]
+        elif 65 <= ord(i) <= 90:
+            pix = word_to_pixels[ord(i)-65]
         else:
             pix = spacePixels
         cubes += pixelsToCube(pix, dotLD, length)
@@ -374,20 +384,12 @@ def numsToCube(n:str, *, length = 20, dotLD = None, offset = dot(0, 0, 0)):
     return cubes
 
 def drawCubes(cubes: list):
-    '''
-    lines = set()
-    for cu in cubes:
-        for line in cu.lines:
-            lines.add(line)
-    for line in sorted(list(lines)):
-        line.draw()
-    '''
     lines = []
     for cu in cubes:
         for line in cu.lines:
             if line in lines:
                 continue
-            for i in range(len(lines)-1):
+            for i in range(1, len(lines)-1):
                 if line.dot1 == lines[i].dot2 and lines[i+1].dot1 != lines[i].dot2:
                     lines.insert(i+1, line)
                     break
@@ -396,11 +398,15 @@ def drawCubes(cubes: list):
     for line in lines:
         line.draw()
 
-t1 = time.time()
-drawCubes(numsToCube("abc", length=20, offset=dot(0, 0, -120)))
-print(time.time()-t1)
-t1 = time.time()
-for cu in numsToCube("abc", length=20):
-    cu.draw()
-print(time.time()-t1)
-time.sleep(2)
+
+if __name__ == "__main__":
+    write_str = "xiaomi"
+    length = 15
+    t1 = time.time()
+    drawCubes(numsToCube(write_str, length=length))
+    print(time.time()-t1)
+    t1 = time.time()
+    for cu in numsToCube(write_str, length=length, offset=dot(0, 0, -120)):
+        cu.draw()
+    print(time.time()-t1)
+    time.sleep(2)
