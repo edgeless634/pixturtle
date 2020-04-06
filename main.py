@@ -4,7 +4,7 @@ import turtle
 import math
 
 # 调整画笔
-turtle.speed(10000)
+turtle.speed(2)
 turtle.pensize(2)
 LINE_LENGTH = 15
 class MyPen:
@@ -354,9 +354,11 @@ def pixelsToCube(pixels, dotLD, length):
     将像素转变为方块
     '''
     cubes = []
+    #遍历每个像素
     for i in range(len(pixels)):
         for j in range(len(pixels[i])):
             if pixels[i][j] != " ":
+                #计算方块的A点和C1点
                 dot1 = dot(dotLD.x + j * length, dotLD.y, dotLD.z + (len(pixels)-i) * length)
                 dot2 = dot(dot1.x + length, dot1.y + length, dot1.z + length)
                 cubes.append(cube(dot1, dot2))
@@ -369,6 +371,7 @@ def numsToCube(n:str, *, length = 20, offset = dot(0, 0, 0)):
     使用offset
     '''
     n = n.upper()
+    #计算总长度
     len_pixel = 0
     for i in n:
         if 48 <= ord(i) <= 57:
@@ -378,8 +381,10 @@ def numsToCube(n:str, *, length = 20, offset = dot(0, 0, 0)):
         else:
             pix = spacePixels
         len_pixel += len(pix[0])
+    #计算左下角的点
     dotLD = dot(-len_pixel//2 * length + offset.x, offset.y, offset.z)
     cubes = []
+    #将每一个字符变成像素
     for i in n:
         if 48 <= ord(i) <= 57:
             pix = numToPixels[ord(i)-48]
@@ -388,21 +393,31 @@ def numsToCube(n:str, *, length = 20, offset = dot(0, 0, 0)):
         else:
             pix = spacePixels
         cubes += pixelsToCube(pix, dotLD, length)
+        #让dotLD移动到下一个字母的左下角
         dotLD = dot(dotLD.x + length * (len(pix[0])+1), dotLD.y, dotLD.z)
     return cubes
 
 def drawCubes(cubes: list):
+    '''
+    画出方块
+    '''
     lines = []
+    #去除重复的边
+    #让可以一笔画出的边连在一起画
+    #遍历每个方块的每一条边
     for cu in cubes:
         for line in cu.lines:
-            if line in lines:
+            if line in lines: #去除重复的边
                 continue
+            #遍历已经加入的边
             for i in range(1, len(lines)-1):
+                #如果可以连在一条边后面，而且不会干扰到其他边的连接
                 if line.dot1 == lines[i].dot2 and lines[i+1].dot1 != lines[i].dot2:
                     lines.insert(i+1, line)
                     break
             else:
                 lines.append(line)
+    #画边
     for line in lines:
         line.draw()
 
@@ -417,6 +432,7 @@ def write_str(write_str):
 
 if __name__ == "__main__":
     turtle.setup(0.8, 0.8)
-    s = "what\ndo\nyou\nthink"
+    s = "what do you\nthink\nabout it"
     t1 = time.time()
     write_str(s)
+    time.sleep(2)
