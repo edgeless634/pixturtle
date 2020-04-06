@@ -4,9 +4,9 @@ import turtle
 import math
 
 # 调整画笔
-turtle.speed(1)
+turtle.speed(10000)
 turtle.pensize(2)
-LINE_LENGTH = 30
+LINE_LENGTH = 15
 class MyPen:
     '''
     一只笔
@@ -362,15 +362,23 @@ def pixelsToCube(pixels, dotLD, length):
                 cubes.append(cube(dot1, dot2))
     return sorted(cubes)
 
-def numsToCube(n:str, *, length = 20, dotLD = None, offset = dot(0, 0, 0)):
+def numsToCube(n:str, *, length = 20, offset = dot(0, 0, 0)):
     '''
     将数字以及字母转变为方块
 
-    如果提供了dotLD则使用dotLD，否则使用offset
+    使用offset
     '''
     n = n.upper()
-    if dotLD == None:
-        dotLD = dot(-len(n)//2 * length * 5 + offset.x, offset.y, offset.z)
+    len_pixel = 0
+    for i in n:
+        if 48 <= ord(i) <= 57:
+            pix = numToPixels[ord(i)-48]
+        elif 65 <= ord(i) <= 90:
+            pix = word_to_pixels[ord(i)-65]
+        else:
+            pix = spacePixels
+        len_pixel += len(pix[0])
+    dotLD = dot(-len_pixel//2 * length + offset.x, offset.y, offset.z)
     cubes = []
     for i in n:
         if 48 <= ord(i) <= 57:
@@ -409,12 +417,6 @@ def write_str(write_str):
 
 if __name__ == "__main__":
     turtle.setup(0.8, 0.8)
-    s = "wow"
+    s = "what\ndo\nyou\nthink"
     t1 = time.time()
     write_str(s)
-    print(time.time()-t1)
-    t1 = time.time()
-    for cu in numsToCube(s, length=LINE_LENGTH, offset=dot(0, 0, -LINE_LENGTH * 6)):
-        cu.draw()
-    print(time.time()-t1)
-    time.sleep(2)
