@@ -6,7 +6,7 @@ import math
 # 调整画笔
 turtle.speed(2)
 turtle.pensize(2)
-LINE_LENGTH = 15
+LINE_LENGTH = 18
 class MyPen:
     '''
     一只笔
@@ -278,7 +278,7 @@ word_to_pixels = [[#A
     "*  *",
     "*** ",
     "*   ",
-    "    ",
+    "*   ",
 ], [#Q
     " ** ",
     "*  *",
@@ -341,13 +341,58 @@ word_to_pixels = [[#A
     "*****",
 ]]
 
-spacePixels = [
+punctuation_pixels = {32:[
     "    ",
     "    ",
     "    ",
     "    ",
     "    ",
-]
+],
+33:[
+    "*",
+    "*",
+    "*",
+    " ",
+    "*",
+],
+39:[
+    "*",
+    "*",
+    " ",
+    " ",
+    " ",
+],
+44:[
+    "  ",
+    "  ",
+    "  ",
+    " *",
+    "* ",
+],
+46:[
+    "  ",
+    "  ",
+    "  ",
+    "**",
+    "**",
+],
+63:[
+    "** ",
+    "  *",
+    " * ",
+    "   ",
+    " * ",
+]}
+
+def chartoPixels(s:str):
+    if 48 <= ord(s) <= 57:
+        return numToPixels[ord(s)-48]
+    elif 65 <= ord(s) <= 90:
+        return word_to_pixels[ord(s)-65]
+    else:
+        return punctuation_pixels[ord(s)]
+
+
 
 def pixelsToCube(pixels, dotLD, length):
     '''
@@ -374,24 +419,14 @@ def numsToCube(n:str, *, length = 20, offset = dot(0, 0, 0)):
     #计算总长度
     len_pixel = 0
     for i in n:
-        if 48 <= ord(i) <= 57:
-            pix = numToPixels[ord(i)-48]
-        elif 65 <= ord(i) <= 90:
-            pix = word_to_pixels[ord(i)-65]
-        else:
-            pix = spacePixels
+        pix = chartoPixels(i)
         len_pixel += len(pix[0])
     #计算左下角的点
     dotLD = dot(-len_pixel//2 * length + offset.x, offset.y, offset.z)
     cubes = []
     #将每一个字符变成像素
     for i in n:
-        if 48 <= ord(i) <= 57:
-            pix = numToPixels[ord(i)-48]
-        elif 65 <= ord(i) <= 90:
-            pix = word_to_pixels[ord(i)-65]
-        else:
-            pix = spacePixels
+        pix = chartoPixels(i)
         cubes += pixelsToCube(pix, dotLD, length)
         #让dotLD移动到下一个字母的左下角
         dotLD = dot(dotLD.x + length * (len(pix[0])+1), dotLD.y, dotLD.z)
@@ -406,17 +441,17 @@ def drawCubes(cubes: list):
     #让可以一笔画出的边连在一起画
     #遍历每个方块的每一条边
     for cu in cubes:
-        for line in cu.lines:
-            if line in lines: #去除重复的边
+        for line1 in cu.lines:
+            if line1 in lines: #去除重复的边
                 continue
             #遍历已经加入的边
             for i in range(1, len(lines)-1):
                 #如果可以连在一条边后面，而且不会干扰到其他边的连接
-                if line.dot1 == lines[i].dot2 and lines[i+1].dot1 != lines[i].dot2:
-                    lines.insert(i+1, line)
+                if line1.dot1 == lines[i].dot2 and lines[i+1].dot1 != lines[i].dot2:
+                    lines.insert(i+1, line1)
                     break
             else:
-                lines.append(line)
+                lines.append(line1)
     #画边
     for line in lines:
         line.draw()
@@ -427,12 +462,12 @@ def write_str(write_str):
     write_strs = write_str.split("\n")
     for i in write_strs:
         drawCubes(numsToCube(i, length=length,\
-            offset=dot(0, 0, length * 7 * (len(write_strs)//2 - line_num))))
+            offset=dot(-length * 4, 0, length * 7 * (len(write_strs)//2 - line_num))))
         line_num += 1
 
 if __name__ == "__main__":
-    turtle.setup(0.8, 0.8)
-    s = "what do you\nthink\nabout it"
+    turtle.setup(0.9, 0.8)
+    s = "abcdefg\nhijklmn\nopqrst\nuvwxyz"
     t1 = time.time()
     write_str(s)
-    time.sleep(2)
+    time.sleep(20)
