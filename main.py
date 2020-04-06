@@ -69,7 +69,8 @@ class line:
                             (self.dot1.y-self.dot2.y)**2 +\
                             (self.dot1.z-self.dot2.z)**2)
     def __eq__(self, obj):
-        return self.dot1 == obj.dot1 and self.dot2 == obj.dot2
+        return (self.dot1 == obj.dot1 and self.dot2 == obj.dot2) or\
+            (self.dot1 == obj.dot2 and self.dot2 == obj.dot1)
     def __hash__(self):
         return self.dot1.__hash__() * self.dot2.__hash__()
     def __lt__(self,obj):
@@ -456,18 +457,18 @@ def drawCubes(cubes: list):
     for line in lines:
         line.draw()
 
-def write_str(write_str):
+def write_str(s):
     length = LINE_LENGTH
     line_num = 0
-    write_strs = write_str.split("\n")
-    for i in write_strs:
+    strs = s.split("\n")
+    for i in strs:
         drawCubes(numsToCube(i, length=length,\
-            offset=dot(-length * 4, 0, length * 7 * (len(write_strs)//2 - line_num))))
+            offset=dot(-length * 4, 0, length * 7 * (len(strs)//2 - line_num))))
         line_num += 1
 
 if __name__ == "__main__":
     turtle.setup(0.9, 0.8)
-    s = "abcdefg\nhijklmn\nopqrst\nuvwxyz"
+    s = "hello, world!"
     t1 = time.time()
     write_str(s)
-    time.sleep(20)
+    time.sleep(5)
