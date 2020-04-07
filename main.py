@@ -6,7 +6,7 @@ import math
 # 调整画笔
 turtle.speed(2)
 turtle.pensize(2)
-LINE_LENGTH = 18
+LINE_LENGTH = 20
 class MyPen:
     '''
     一只笔
@@ -161,8 +161,8 @@ numToPixels = [[#0
 ], [#6
     " ** ",
     "*   ",
-    "*** ",
-    "* * ",
+    "****",
+    "*  *",
     " ** ",
 ], [#7
     " ***",
@@ -457,18 +457,15 @@ def drawCubes(cubes: list):
     for line in lines:
         line.draw()
 
-def write_str(s):
-    length = LINE_LENGTH
+def write_str(s, length = LINE_LENGTH, offset = dot(0, 0, 0)):
     line_num = 0
     strs = s.split("\n")
     for i in strs:
         drawCubes(numsToCube(i, length=length,\
-            offset=dot(-length * 4, 0, length * 7 * (len(strs)//2 - line_num))))
+            offset=dot(-length * 4 + offset.x, offset.y, length * 7 * (len(strs)//2 - line_num) + offset.z)))
         line_num += 1
 
 if __name__ == "__main__":
     turtle.setup(0.9, 0.8)
-    s = "hello, world!"
     t1 = time.time()
-    write_str(s)
-    time.sleep(5)
+    write_str("pixturtle")
