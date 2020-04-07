@@ -6,6 +6,8 @@ import math
 # 调整画笔
 turtle.speed(2)
 turtle.pensize(2)
+# 调大窗口
+turtle.setup(0.9, 0.8)
 LINE_LENGTH = 20
 class MyPen:
     '''
@@ -466,6 +468,5 @@ def write_str(s, length = LINE_LENGTH, offset = dot(0, 0, 0)):
         line_num += 1
 
 if __name__ == "__main__":
-    turtle.setup(0.9, 0.8)
-    t1 = time.time()
     write_str("pixturtle")
+    time.sleep(2)
